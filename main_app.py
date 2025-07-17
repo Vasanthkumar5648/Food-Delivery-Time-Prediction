@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 import time
 
 # Load data
-df = pd.read_csv(r"D:\download\9e6aa-delivery-time\Delivery time\deliverytime.txt")
+df = pd.read_csv('https://raw.github.com/Vasanthkumar5648/Food-Delivery-Time-Prediction/main/deliverytime.txt')
 df.head()
 df.info()
 df.isnull().sum()
