@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, LSTM
-from sklearn.model_selection import train_test_split
-import time
+#from tensorflow.keras.models import Sequential
+#from tensorflow.keras.layers import Dense, LSTM
+#from sklearn.model_selection import train_test_split
+#import time
 # Streamlit app
 def main():
     st.set_page_config(page_title="Food Delivery Time Predictor", page_icon="🍔", layout="wide")
