@@ -45,8 +45,6 @@ def load_data_and_train_model():
         st.warning(f"Using simplified prediction method. Model loading failed: {str(e)}")
         return None, False
 
-model, model_loaded = load_data_and_train_model()
-
 # Streamlit app
 def main():
     st.set_page_config(page_title="Food Delivery Time Predictor", page_icon="🍔", layout="wide")
