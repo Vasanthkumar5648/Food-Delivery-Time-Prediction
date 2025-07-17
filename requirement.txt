@@ -1,4 +1,5 @@
-keras
+tensorflow.keras.model
+sequential
 tensorflow=2.12.0
 streamlit
 pandas
