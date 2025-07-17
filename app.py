@@ -1,11 +1,15 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from keras.models import load_model
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense,LSTM
+from sklearn.model_selection import train_test_split
 import time
 
-# Load the pre-trained model (you'll need to save it first)
-# model = load_model('model.h5')
+df = pd.read_csv(r"D:\download\9e6aa-delivery-time\Delivery time\deliverytime.txt")
+df.head()
+df.info
+df.isnull().sum()
 
 # Constants
 R = 6371  # Earth's radius in km
@@ -21,6 +25,8 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     a = np.sin(d_lat/2)**2 + np.cos(deg_to_rad(lat1)) * np.cos(deg_to_rad(lat2)) * np.sin(d_lon/2)**2
     c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1-a))
     return R * c
+
+df['distance'] = np.nan
 
 # Streamlit app
 def main():
@@ -60,7 +66,7 @@ def main():
         - Delivery partner's age
         - Delivery partner's ratings
         - Distance between restaurant and delivery location
-        """)
+        """)    
     
     # Input form
     with st.form("delivery_form"):
@@ -99,11 +105,36 @@ def main():
             # Predict (using dummy model - replace with your actual model)
             # features = np.array([[age, ratings, distance]])
             # prediction = model.predict(features)[0][0]
-            
+     for i in range(len(df)):
+         df.loc[i,'distance'] = distcalculate(df.loc[i,'Restaurant_latitude'],
+                                        df.loc[i,'Restaurant_longitude'],
+                                        df.loc[i,'Delivery_location_latitude'],
+                                        df.loc[i,'Delivery_location_latitude'])
+     x=np.array(df[["Delivery_person_Age",
+              "Delivery_person_Ratings",
+              "distance"]])
+     y=np.array(df[["Time_taken(min)"]])
+     x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.10,random_state=42)
             # For demo purposes - replace with actual model prediction
             prediction = max(15, min(120, distance * 2 + np.random.normal(10, 5) - (ratings * 3) + (age / 10)))
-            
-            # Show prediction with animation
+     model = Sequential()
+     model.add(LSTM(128, return_sequences=True, input_shape=(x_train.shape[1],1)))
+     model.add(LSTM(64, return_sequences=False))
+     model.add(Dense(25))
+     model.add(Dense(1))
+     model.summary()       
+
+     model.compile(optimizer='adam', loss='mean_squared_error') 
+     model.fit(x_train,y_train, batch_size=1,epochs=10)
+
+     print("Food Delivery Time Prediction")
+     a = int(input("Age of Delivery Parnter"))
+     b = float(input("Ratings of Previous Deliveries:"))
+     c = int(input("Total Distance:"))
+
+    features = np.array([[a,b,c]])
+    print("Predicted Delivery Time in Minutes =", model.predict(features))
+# Show prediction with animation
             with st.spinner('Calculating delivery time...'):
                 time.sleep(2)
                 st.success("Prediction complete!")
