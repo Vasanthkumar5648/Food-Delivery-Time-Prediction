@@ -21,30 +21,20 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     return R * c
 
 # Load data and train model
-@st.cache_resource
-def load_data_and_train_model():
-    try:
-        df = pd.read_csv("deliverytime.txt")
-        df['distance'] = df.apply(lambda row: calculate_distance(
+df = pd.read_csv("deliverytime.txt")
+df['distance'] = df.apply(lambda row: calculate_distance(
             row['Restaurant_latitude'],
             row['Restaurant_longitude'],
             row['Delivery_location_latitude'],
             row['Delivery_location_longitude']
         ), axis=1)
-
-        X = df[["Delivery_person_Age", "Delivery_person_Ratings", "distance"]]
-        y = df["Time_taken(min)"]
+X = df[["Delivery_person_Age", "Delivery_person_Ratings", "distance"]]
+y = df["Time_taken(min)"]
         
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+model = RandomForestRegressor(n_estimators=50, random_state=42)
+model.fit(X_train, y_train)
         
-        model = RandomForestRegressor(n_estimators=50, random_state=42)
-        model.fit(X_train, y_train)
-        
-        return model, True
-    except Exception as e:
-        st.warning(f"Using simplified prediction method. Model loading failed: {str(e)}")
-        return None, False
-
 # Streamlit app
 def main():
     st.set_page_config(page_title="Food Delivery Time Predictor", page_icon="🍔", layout="wide")
