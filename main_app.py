@@ -5,52 +5,6 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM
 from sklearn.model_selection import train_test_split
 import time
-
-# Load data
-df = pd.read_csv('https://raw.github.com/Vasanthkumar5648/Food-Delivery-Time-Prediction/main/deliverytime.txt')
-df.head()
-df.info()
-df.isnull().sum()
-
-# Constants
-R = 6371  # Earth's radius in km
-
-# Function to convert degrees to radians
-def deg_to_rad(degrees):
-    return degrees * (np.pi/180)
-
-# Haversine formula to calculate distance
-def calculate_distance(lat1, lon1, lat2, lon2):
-    d_lat = deg_to_rad(lat2-lat1)
-    d_lon = deg_to_rad(lon2-lon1)
-    a = np.sin(d_lat/2)**2 + np.cos(deg_to_rad(lat1)) * np.cos(deg_to_rad(lat2)) * np.sin(d_lon/2)**2
-    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1-a))
-    return R * c
-
-# Calculate distances for the dataset
-df['distance'] = df.apply(lambda row: calculate_distance(
-    row['Restaurant_latitude'],
-    row['Restaurant_longitude'],
-    row['Delivery_location_latitude'],
-    row['Delivery_location_longitude']
-), axis=1)
-
-# Prepare features and target
-x = np.array(df[["Delivery_person_Age", "Delivery_person_Ratings", "distance"]])
-y = np.array(df[["Time_taken(min)"]])
-
-# Split data
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.10, random_state=42)
-
-# Build and train model
-model = Sequential()
-model.add(LSTM(128, return_sequences=True, input_shape=(x_train.shape[1], 1)))
-model.add(LSTM(64, return_sequences=False))
-model.add(Dense(25))
-model.add(Dense(1))
-model.compile(optimizer='adam', loss='mean_squared_error')
-model.fit(x_train, y_train, batch_size=1, epochs=10)
-
 # Streamlit app
 def main():
     st.set_page_config(page_title="Food Delivery Time Predictor", page_icon="🍔", layout="wide")
