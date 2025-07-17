@@ -2,5 +2,6 @@ streamlit
 pandas
 numpy
 tensorflow.keras
+tensorflow.keras.model
 plotly
 scikit-learn
