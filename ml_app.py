@@ -143,3 +143,5 @@ def main():
                     st.error(f"Prediction failed: {str(e)}")
         else:
             st.error("Please enter valid location coordinates for both restaurant and delivery location.")
+if __name__ == "__main__":
+    main()
