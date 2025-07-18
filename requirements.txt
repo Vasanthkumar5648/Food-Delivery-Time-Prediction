@@ -1,3 +1,5 @@
+protobuf 
+tensorflow
 streamlit
 scikit-learn
 pandas
