@@ -63,7 +63,7 @@ Delivery Location Latitude/Longitude
 ## 🖥️ Tech Stack
 Core Components
 Diagram:
-![image](./images/app-screenshot.png)
+![image](https://raw.github.com/Vasanthkumar5648/Food-Delivery-Time-Prediction/blob/main/image.png)
 
 code:
 graph TD
