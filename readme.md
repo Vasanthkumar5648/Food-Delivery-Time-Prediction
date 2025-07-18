@@ -1,6 +1,6 @@
 # 🚚 Food Delivery Time Prediction App
 
-![App Screenshot](./images/app-screenshot.png)
+![App Screenshot](./images/app.jpg)
 
 <p align="center">
   <a href="#overview">Overview</a> •
