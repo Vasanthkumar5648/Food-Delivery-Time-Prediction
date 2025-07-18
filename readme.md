@@ -64,6 +64,7 @@ Delivery Location Latitude/Longitude
 Core Components
 Diagram:
 ![image](./images/app-screenshot.png)
+
 code:
 graph TD
     A[Streamlit] --> B[Frontend]
