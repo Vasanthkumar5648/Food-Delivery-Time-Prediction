@@ -21,7 +21,7 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     return R * c
 
 # Load data and train model
-df = pd.read_csv("deliverytime.txt")
+df = pd.read_csv('https://raw.github.com/Vasanthkumar5648/Food-Delivery-Time-Prediction/main/deliverytime.txt')
 df['distance'] = df.apply(lambda row: calculate_distance(
             row['Restaurant_latitude'],
             row['Restaurant_longitude'],
