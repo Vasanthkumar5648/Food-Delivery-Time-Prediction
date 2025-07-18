@@ -36,112 +36,105 @@ model = RandomForestRegressor(n_estimators=50, random_state=42)
 model.fit(X_train, y_train)
         
 # Streamlit app
-def main():
-    st.set_page_config(page_title="Food Delivery Time Predictor", page_icon="🍔", layout="wide")
+st.set_page_config(page_title="Food Delivery Time Predictor", page_icon="🍔", layout="wide")
+
+# Custom CSS
+st.markdown("""
+<style>
+    .main {
+        background-color: #f5f5f5;
+    }
+    .stButton>button {
+        background-color: #4CAF50;
+        color: white;
+        font-weight: bold;
+    }
+    .stTextInput>div>div>input, .stNumberInput>div>div>input {
+        background-color: #ffffff;
+    }
+    .css-1aumxhk {
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Header
+st.title("🍔 Food Delivery Time Prediction")
+st.markdown("Predict how long your food delivery will take based on delivery partner details and distance.")
+
+with st.expander("ℹ️ About this app"):
+    st.write("""
+    This app predicts food delivery time based on:
+    - Delivery partner's age
+    - Delivery partner's ratings
+    - Distance between restaurant and delivery location
+    """)    
+
+# Input form
+with st.form("delivery_form"):
+    st.header("Enter Delivery Details")
     
-    # Custom CSS
-    st.markdown("""
-    <style>
-        .main {
-            background-color: #f5f5f5;
-        }
-        .stButton>button {
-            background-color: #4CAF50;
-            color: white;
-            font-weight: bold;
-        }
-        .stTextInput>div>div>input, .stNumberInput>div>div>input {
-            background-color: #ffffff;
-        }
-        .css-1aumxhk {
-            background-color: #ffffff;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-    </style>
-    """, unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
     
-    # Header
-    st.title("🍔 Food Delivery Time Prediction")
-    st.markdown("Predict how long your food delivery will take based on delivery partner details and distance.")
+    with col1:
+        age = st.number_input("Age of Delivery Partner", min_value=18, max_value=70, value=25)
+        ratings = st.slider("Ratings of Delivery Partner", min_value=1.0, max_value=5.0, value=4.5, step=0.1)
     
-    if not model_loaded:
-        st.info("Note: Using simplified prediction method as the machine learning model couldn't be loaded")
-    
-    with st.expander("ℹ️ About this app"):
-        st.write("""
-        This app predicts food delivery time based on:
-        - Delivery partner's age
-        - Delivery partner's ratings
-        - Distance between restaurant and delivery location
-        """)    
-    
-    # Input form
-    with st.form("delivery_form"):
-        st.header("Enter Delivery Details")
+    with col2:
+        st.subheader("Restaurant Location")
+        rest_lat = st.number_input("Restaurant Latitude", format="%.6f")
+        rest_lon = st.number_input("Restaurant Longitude", format="%.6f")
         
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            age = st.number_input("Age of Delivery Partner", min_value=18, max_value=70, value=25)
-            ratings = st.slider("Ratings of Delivery Partner", min_value=1.0, max_value=5.0, value=4.5, step=0.1)
-        
-        with col2:
-            st.subheader("Restaurant Location")
-            rest_lat = st.number_input("Restaurant Latitude", format="%.6f")
-            rest_lon = st.number_input("Restaurant Longitude", format="%.6f")
-            
-            st.subheader("Delivery Location")
-            deliv_lat = st.number_input("Delivery Location Latitude", format="%.6f")
-            deliv_lon = st.number_input("Delivery Location Longitude", format="%.6f")
-        
-        submitted = st.form_submit_button("Predict Delivery Time")
+        st.subheader("Delivery Location")
+        deliv_lat = st.number_input("Delivery Location Latitude", format="%.6f")
+        deliv_lon = st.number_input("Delivery Location Longitude", format="%.6f")
     
-    # When form is submitted
-    if submitted:
-        if rest_lat and rest_lon and deliv_lat and deliv_lon:
-            # Calculate distance
-            distance = calculate_distance(rest_lat, rest_lon, deliv_lat, deliv_lon)
-            
-            # Display inputs
-            st.subheader("Input Summary")
-            col1, col2, col3 = st.columns(3)
-            col1.metric("Delivery Partner Age", f"{age} years")
-            col2.metric("Delivery Partner Ratings", f"{ratings}/5")
-            col3.metric("Distance", f"{distance:.2f} km")
-            
-            # Make prediction
-            with st.spinner('Calculating delivery time...'):
-                try:
-                    if model_loaded:
-                        features = np.array([[age, ratings, distance]])
-                        prediction = model.predict(features)[0]
-                    else:
-                        # Fallback formula if model isn't available
-                        prediction = max(15, min(120, 
-                                            distance * 2 + 
-                                            (5 - ratings) * 5 + 
-                                            (35 - age) * 0.5))
-                    
-                    time.sleep(1)  # Just for effect
-                    
-                    st.success("Prediction complete!")
-                    st.subheader("Predicted Delivery Time")
-                    st.markdown(f"<h1 style='text-align: center; color: #4CAF50;'>{int(prediction)} minutes</h1>", 
-                                unsafe_allow_html=True)
-                    
-                    # Visual indicator
-                    if prediction < 30:
-                        st.success("Fast delivery expected! 🚀")
-                    elif prediction < 45:
-                        st.info("Average delivery time ⏱️")
-                    else:
-                        st.warning("Longer delivery time expected 🐢")
+    submitted = st.form_submit_button("Predict Delivery Time")
+
+# When form is submitted
+if submitted:
+    if rest_lat and rest_lon and deliv_lat and deliv_lon:
+        # Calculate distance directly
+        d_lat = (deliv_lat - rest_lat) * (np.pi/180)
+        d_lon = (deliv_lon - rest_lon) * (np.pi/180)
+        a = (np.sin(d_lat/2)**2 + 
+             np.cos(rest_lat*(np.pi/180)) * 
+             np.cos(deliv_lat*(np.pi/180)) * 
+             np.sin(d_lon/2)**2)
+        distance = 6371 * 2 * np.arctan2(np.sqrt(a), np.sqrt(1-a))
+        
+        # Display inputs
+        st.subheader("Input Summary")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Delivery Partner Age", f"{age} years")
+        col2.metric("Delivery Partner Ratings", f"{ratings}/5")
+        col3.metric("Distance", f"{distance:.2f} km")
+        
+        # Make prediction
+        with st.spinner('Calculating delivery time...'):
+            try:
+                features = np.array([[age, ratings, distance]])
+                prediction = model.predict(features)[0]
                 
-                except Exception as e:
-                    st.error(f"Prediction failed: {str(e)}")
-        else:
-            st.error("Please enter valid location coordinates for both restaurant and delivery location.")
-if __name__ == "__main__":
-    main()
+                time.sleep(1)  # Just for effect
+                
+                st.success("Prediction complete!")
+                st.subheader("Predicted Delivery Time")
+                st.markdown(f"<h1 style='text-align: center; color: #4CAF50;'>{int(prediction)} minutes</h1>", 
+                            unsafe_allow_html=True)
+                
+                # Visual indicator
+                if prediction < 30:
+                    st.success("Fast delivery expected! 🚀")
+                elif prediction < 45:
+                    st.info("Average delivery time ⏱️")
+                else:
+                    st.warning("Longer delivery time expected 🐢")
+            
+            except Exception as e:
+                st.error(f"Prediction failed: {str(e)}")
+    else:
+        st.error("Please enter valid location coordinates for both restaurant and delivery location.")
